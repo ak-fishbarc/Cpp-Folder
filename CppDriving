@@ -1,0 +1,72 @@
+#include <iostream>
+using namespace std;
+
+class FieldDisplay
+{
+public:
+	int sizex;
+	int sizey;
+	int** field_arr;
+	string field_repr;
+
+	FieldDisplay(int x, int y)
+	{
+		sizex = x;
+		sizey = y;
+		field_repr = "";
+	}
+
+	int** CreateField()
+	{
+		field_arr = (int**)malloc(sizex * sizeof(int*));
+		for (int x = 0; x < sizex; x++)
+		{
+			field_arr[x] = (int*)malloc(sizey * sizeof(int));
+			for (int i = 0; i < sizey; i++)
+			{
+				field_arr[x][i] = 0;
+
+			}
+		}
+		return field_arr;
+	}
+
+	string FieldRepr()
+	{
+		field_repr += "\n";
+		for (int x = 0; x < sizex; x++)
+		{
+			for (int y = 0; y < sizey; y++)
+			{
+				field_repr += " " + to_string(field_arr[x][y]) + " ";
+			}
+			field_repr += "\n";
+		}
+		return field_repr;
+	}
+};
+
+class Player
+{
+public:
+	int posx;
+	int posy;
+	char player_repr;
+
+	Player(int x, int y, char repr)
+	{
+		posx = x;
+		posy = y;
+		player_repr = repr;
+	}
+};
+
+int main()
+{
+	FieldDisplay fd(9, 9);
+	Player pc(4, 9, '4');
+	fd.CreateField();
+	cout << fd.FieldRepr();
+
+	return 0;
+}
