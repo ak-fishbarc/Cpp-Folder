@@ -1,6 +1,21 @@
 #include <iostream>
 using namespace std;
 
+class Player
+{
+public:
+	int posx;
+	int posy;
+	int player_repr;
+
+	Player(int x, int y, int repr)
+	{
+		posx = x;
+		posy = y;
+		player_repr = repr;
+	}
+};
+
 class Entity
 {
 public:
@@ -8,13 +23,19 @@ public:
 	int posy;
 	int map_repr;
 
-	Entity(int posx, int posy, int map_repr)
+	Entity(int x, int y, int repr)
 	{
-		posx = posx;
-		posy = posy;
-		map_repr = map_repr;
+		posx = x;
+		posy = y;
+		map_repr = repr;
+	}
+	
+	void move_self_x()
+	{
+	    posx += 1;
 	}
 };
+
 class FieldDisplay
 {
 public:
@@ -22,6 +43,9 @@ public:
 	int sizey;
 	int** field_arr;
 	string field_repr;
+	// List of translations for display. E.g. if map representation of an Entity
+	// is 2, display " O ". This is to avoid converting ints and strings.
+	string codex[3] = {" ", " P ", " O "};
 
 	FieldDisplay(int x, int y)
 	{
@@ -52,7 +76,18 @@ public:
 		{
 			for (int y = 0; y < sizey; y++)
 			{
-				field_repr += " " + to_string(field_arr[x][y]) + " ";
+			    switch(field_arr[x][y])
+			    {
+			        case 0:
+				        field_repr += codex[0];
+				        break;
+				    case 1:
+				        field_repr += codex[1];
+				        break;
+				    case 2:
+				        field_repr += codex[2];
+				        break;
+			    }
 			}
 			field_repr += "\n";
 		}
@@ -63,29 +98,27 @@ public:
 	{
 		field_arr[posx][posy] = map_repr;
 	}
+	
 };
 
-class Player
-{
-public:
-	int posx;
-	int posy;
-	char player_repr;
-
-	Player(int x, int y, int repr)
-	{
-		posx = x;
-		posy = y;
-		player_repr = repr;
-	}
-};
+// Temporarily here. This will be moved.
+Entity* entities[30];
 
 int main()
 {
 	FieldDisplay fd(9, 9);
-	Player pc(8, 4, 4);
+	Player pc(8, 4, 1);
+	Entity obstacle(0, 5, 2);
+	entities[0] = &obstacle;
 	fd.CreateField();
 	fd.placeEntity(pc.posx, pc.posy, pc.player_repr);
+	fd.placeEntity(obstacle.posx, obstacle.posy, obstacle.map_repr);
+	cout << fd.FieldRepr();
+	entities[0]->move_self_x();
+	entities[0]->move_self_x();
+	entities[0]->move_self_x();
+
+	fd.placeEntity(obstacle.posx, obstacle.posy, obstacle.map_repr);
 	cout << fd.FieldRepr();
 
 	return 0;
