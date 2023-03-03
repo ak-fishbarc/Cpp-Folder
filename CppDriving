@@ -1,6 +1,20 @@
 #include <iostream>
 using namespace std;
 
+class Entity
+{
+public:
+	int posx;
+	int posy;
+	int map_repr;
+
+	Entity(int posx, int posy, int map_repr)
+	{
+		posx = posx;
+		posy = posy;
+		map_repr = map_repr;
+	}
+};
 class FieldDisplay
 {
 public:
@@ -44,6 +58,11 @@ public:
 		}
 		return field_repr;
 	}
+
+	void placeEntity(int posx, int posy, int map_repr)
+	{
+		field_arr[posx][posy] = map_repr;
+	}
 };
 
 class Player
@@ -53,7 +72,7 @@ public:
 	int posy;
 	char player_repr;
 
-	Player(int x, int y, char repr)
+	Player(int x, int y, int repr)
 	{
 		posx = x;
 		posy = y;
@@ -64,8 +83,9 @@ public:
 int main()
 {
 	FieldDisplay fd(9, 9);
-	Player pc(4, 9, '4');
+	Player pc(8, 4, 4);
 	fd.CreateField();
+	fd.placeEntity(pc.posx, pc.posy, pc.player_repr);
 	cout << fd.FieldRepr();
 
 	return 0;
