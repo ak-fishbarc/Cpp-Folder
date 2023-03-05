@@ -1,7 +1,10 @@
 #include <iostream>
 #include <cstdlib>
 #include <unistd.h>
+#include <thread>
 using namespace std;
+
+// This is still a draft. It needs some refactoring to make it more readable.
 
 /* Entity counter get increased when a new entity is created.
    This counter is used as a unique id for each entity and then it's used
@@ -144,8 +147,11 @@ public:
     {
         spawn_timer = rand() % 15 + 0;
     }
-	// Check if space on the map is free, before returning y position for newly
-	// generated entity.
+	/* Check if space on the map is free, before returning y position for newly
+	   generated entity.
+	   Currently as expected, this function triggers warnings as there is a 
+	   chance for infinite loop or no return value. */
+	
 	int check_space()
 	{
 	    int done = 1;
@@ -206,7 +212,43 @@ public:
 	{
 	    return entities[x];
 	}
+	
+	void move_player(int field_sizey, int** field_array, Player* player)
+	{
+	    char direction;
+	    cout << "A or D: To move left or right, respectively.";
+	    cin >> direction;
+	    if(direction == 'a' && player->posy-1 > 0)
+	    {
+	        field_array[player->posx][player->posy] = 0;
+	        player->posy -= 1;
+	    }
+	    else if(direction == 'd' && player->posy+1 < field_sizey)
+	    {
+	        field_array[player->posx][player->posy] = 0;
+	        player->posy += 1;
+	    }
+	}
 };
+
+void player_movement(FieldDisplay* field, Player* player)
+{
+    char direction;
+    cout << "Type 'a' or 'd' to move player to the left or to the right, respectively";
+    cin >> direction;
+    if(direction == 'a' && player->posy-1 > 0)
+    {
+        field->field_arr[player->posx][player->posy] = 0;
+        player->posy -= 1;
+        field->placeEntity(player->posx, player->posy, player->player_repr);
+    }
+    else if(direction == 'd' && player->posy+1 < field->sizey)
+    {
+        field->field_arr[player->posx][player->posy] = 0;
+        player->posy += 1;
+        field->placeEntity(player->posx, player->posy, player->player_repr);
+    }
+}
 
 int main()
 {
@@ -223,10 +265,11 @@ int main()
 	gc.set_entity(obstacle);
 	gc.create_entity();
 	gc.set_timer();
-	// Test loop
+	// Test 
 	int game_on = 1;
 	while(game_on == 1)
 	{
+	    thread move_player(player_movement, &fd, &pc);
 	    gc.spawn_timer -= 1;
 	    if(gc.spawn_timer == 0)
 	    {
@@ -244,6 +287,7 @@ int main()
 	    }
 	    cout << fd.FieldRepr();
 	    sleep(1);
+	    move_player.detach();
 	}
 	return 0;
 }
