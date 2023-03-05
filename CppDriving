@@ -137,7 +137,13 @@ class GameControl
 {
 public:
 	Entity* entities = (Entity*) malloc(sizeof(Entity*) * 30);
+	// spawn_timer is used to randomly create new obstacles as the game goes on.
+    int spawn_timer;
     
+    void set_timer()
+    {
+        spawn_timer = rand() % 15 + 0;
+    }
 	// Check if space on the map is free, before returning y position for newly
 	// generated entity.
 	int check_space()
@@ -155,7 +161,7 @@ public:
 	        }
 	    }
 	}
-	
+	// Functions create_entity and set_entity; go together
 	void create_entity()
 	{
 	    int get_random_y = check_space();
@@ -216,10 +222,17 @@ int main()
 	cout << fd.FieldRepr();
 	gc.set_entity(obstacle);
 	gc.create_entity();
+	gc.set_timer();
 	// Test loop
 	int game_on = 1;
 	while(game_on == 1)
 	{
+	    gc.spawn_timer -= 1;
+	    if(gc.spawn_timer == 0)
+	    {
+	        gc.create_entity();
+	        gc.set_timer();
+	    }
 	    gc.move_entities(fd.sizex, fd.field_arr);
 	    for(int x = 0; x < entity_counter; x++)
 	    {
