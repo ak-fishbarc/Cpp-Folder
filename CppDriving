@@ -31,6 +31,9 @@ public:
 	int posy;
 	int map_repr;
 	int e_id;
+	// Respawn timer; Used by redrawing functions so that entities do not respawn
+	// all together when they reach the end of the map.
+	int respawn_timer;
 
 	Entity(int x, int y, int repr, int new_id)
 	{
@@ -38,6 +41,7 @@ public:
 		posy = y;
 		map_repr = repr;
 		e_id = new_id;
+		respawn_timer = 0;
 	}
 
     // This functions are here, as in the future I might decide to make class
@@ -121,6 +125,11 @@ public:
 	{
 		field_arr[posx][posy] = map_repr;
 	}
+	
+	void clearPlace(int posx, int posy)
+	{
+	    field_arr[posx][posy] = 0;
+	}
 
 };
 
@@ -166,8 +175,15 @@ public:
 	    {
 	        if(entities[x].posx+1 <= field_sizex-1)
 	        {
-	            field_array[entities[x].posx][entities[x].posy] = 0;
-    	        entities[x].move_self_x();
+	            if(entities[x].respawn_timer == 0)
+	            {
+	                field_array[entities[x].posx][entities[x].posy] = 0;
+    	            entities[x].move_self_x();
+	            }
+	            else
+	            {
+	                entities[x].respawn_timer -= 1;
+	            }
 	        }
 	        else
 	        {
@@ -175,6 +191,7 @@ public:
 	            entities[x].restart_self_x();
 	            int get_random_y = check_space();
                 entities[x].reposition_self_y(get_random_y);
+                entities[x].respawn_timer = rand() % 10;
 	        }
 	    }
 	}
@@ -207,7 +224,10 @@ int main()
 	    for(int x = 0; x < entity_counter; x++)
 	    {
 	        Entity update_entity = gc.get_entity(x);
-	        fd.placeEntity(update_entity.posx, update_entity.posy, update_entity.map_repr);
+	        if(update_entity.respawn_timer == 0)
+	        {
+	            fd.placeEntity(update_entity.posx, update_entity.posy, update_entity.map_repr);
+	        }
 	    }
 	    cout << fd.FieldRepr();
 	    sleep(1);
