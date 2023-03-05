@@ -1,4 +1,5 @@
 #include <iostream>
+#include <unistd.h>
 using namespace std;
 
 /* Entity counter get increased when a new entity is created.
@@ -53,7 +54,7 @@ public:
 	string field_repr;
 	// List of translations for display. E.g. if map representation of an Entity
 	// is 2, display " O ". This is to avoid converting ints and strings for display.
-	string codex[3] = { " ", " P ", " O " };
+	string codex[3] = { "   ", " P ", " O " };
 
 	FieldDisplay(int x, int y)
 	{
@@ -118,13 +119,17 @@ public:
 	{
 	    entities[entity->e_id] = entity;
 	}
-	void move_entities()
+	
+	void move_entities(int field_sizex, int** field_array)
 	{
 	    for(int x = 0; x < entity_counter; x++)
 	    {
-	        entities[x]->move_self_x();
+	        if(entities[x]->posx+1 <= field_sizex-1)
+	        {
+	            field_array[entities[x]->posx][entities[x]->posy] = 0;
+    	        entities[x]->move_self_x();
+	        }
 	    }
-	        
 	}
 };
 
@@ -140,10 +145,14 @@ int main()
 	fd.placeEntity(obstacle.posx, obstacle.posy, obstacle.map_repr);
 	cout << fd.FieldRepr();
 	gc.set_entity(&obstacle);
-	gc.move_entities();
-
-	fd.placeEntity(obstacle.posx, obstacle.posy, obstacle.map_repr);
-	cout << fd.FieldRepr();
-
+	// Test loop
+	int game_on = 1;
+	while(game_on == 1)
+	{
+	    gc.move_entities(fd.sizex, fd.field_arr);
+	    fd.placeEntity(obstacle.posx, obstacle.posy, obstacle.map_repr);
+	    cout << fd.FieldRepr();
+	    sleep(1);
+	}
 	return 0;
 }
