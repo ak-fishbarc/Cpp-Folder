@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdlib>
 #include <unistd.h>
 using namespace std;
 
@@ -39,10 +40,23 @@ public:
 		e_id = new_id;
 	}
 
+    // This functions are here, as in the future I might decide to make class
+    // properties private; To avoid mingling with them directly. For now, this is 
+    // allowed as this is a prototype.
 	void move_self_x()
 	{
 		posx += 1;
 	}
+
+    void restart_self_x()
+    {
+        posx = 0;
+    }
+    
+    void reposition_self_y(int y)
+    {
+        posy = y;
+    }
 };
 
 class FieldDisplay
@@ -114,10 +128,29 @@ class GameControl
 {
 public:
 	Entity* entities = (Entity*) malloc(sizeof(Entity*) * 30);
+    
+	// Check if space on the map is free, before returning y position for newly
+	// generated entity.
+	int check_space()
+	{
+	    int done = 1;
+	    while(done == 1)
+	    {
+	        int random_y = rand() % 9 + 0;
+	        for(int x = 0; x < entity_counter; x++)
+	        {
+	            if(entities[x].posy != random_y)
+	            {
+	                return random_y;
+	            }
+	        }
+	    }
+	}
 	
 	void create_entity()
 	{
-        Entity new_obstacle(0, 2, 2, entity_counter);
+	    int get_random_y = check_space();
+        Entity new_obstacle(0, get_random_y, 2, entity_counter);
         set_entity(new_obstacle);
         entity_counter += 1;
 	}
@@ -136,6 +169,13 @@ public:
 	            field_array[entities[x].posx][entities[x].posy] = 0;
     	        entities[x].move_self_x();
 	        }
+	        else
+	        {
+	            field_array[entities[x].posx][entities[x].posy] = 0;
+	            entities[x].restart_self_x();
+	            int get_random_y = check_space();
+                entities[x].reposition_self_y(get_random_y);
+	        }
 	    }
 	}
 	
@@ -147,6 +187,7 @@ public:
 
 int main()
 {
+    srand(time(NULL));
 	FieldDisplay fd(9, 9);
 	GameControl gc;
 	Player pc(8, 4, 1);
