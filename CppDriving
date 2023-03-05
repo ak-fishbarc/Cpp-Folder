@@ -1,6 +1,12 @@
 #include <iostream>
 using namespace std;
 
+/* Entity counter get increased when a new entity is created.
+   This counter is used as a unique id for each entity and then it's used
+   In GameControl as an index for list of entities in the game. */
+   
+int entity_counter = 0;
+
 class Player
 {
 public:
@@ -22,17 +28,19 @@ public:
 	int posx;
 	int posy;
 	int map_repr;
+	int e_id;
 
-	Entity(int x, int y, int repr)
+	Entity(int x, int y, int repr, int new_id)
 	{
 		posx = x;
 		posy = y;
 		map_repr = repr;
+		e_id = new_id;
 	}
-	
+
 	void move_self_x()
 	{
-	    posx += 1;
+		posx += 1;
 	}
 };
 
@@ -44,8 +52,8 @@ public:
 	int** field_arr;
 	string field_repr;
 	// List of translations for display. E.g. if map representation of an Entity
-	// is 2, display " O ". This is to avoid converting ints and strings.
-	string codex[3] = {" ", " P ", " O "};
+	// is 2, display " O ". This is to avoid converting ints and strings for display.
+	string codex[3] = { " ", " P ", " O " };
 
 	FieldDisplay(int x, int y)
 	{
@@ -76,18 +84,18 @@ public:
 		{
 			for (int y = 0; y < sizey; y++)
 			{
-			    switch(field_arr[x][y])
-			    {
-			        case 0:
-				        field_repr += codex[0];
-				        break;
-				    case 1:
-				        field_repr += codex[1];
-				        break;
-				    case 2:
-				        field_repr += codex[2];
-				        break;
-			    }
+				switch (field_arr[x][y])
+				{
+				case 0:
+					field_repr += codex[0];
+					break;
+				case 1:
+					field_repr += codex[1];
+					break;
+				case 2:
+					field_repr += codex[2];
+					break;
+				}
 			}
 			field_repr += "\n";
 		}
@@ -98,25 +106,41 @@ public:
 	{
 		field_arr[posx][posy] = map_repr;
 	}
-	
+
 };
 
-// Temporarily here. This will be moved.
-Entity* entities[30];
+class GameControl
+{
+public:
+	Entity* entities[30];
+	
+	void set_entity(Entity* entity)
+	{
+	    entities[entity->e_id] = entity;
+	}
+	void move_entities()
+	{
+	    for(int x = 0; x < entity_counter; x++)
+	    {
+	        entities[x]->move_self_x();
+	    }
+	        
+	}
+};
 
 int main()
 {
 	FieldDisplay fd(9, 9);
+	GameControl gc;
 	Player pc(8, 4, 1);
-	Entity obstacle(0, 5, 2);
-	entities[0] = &obstacle;
+	Entity obstacle(0, 5, 2, entity_counter);
+	entity_counter += 1;
 	fd.CreateField();
 	fd.placeEntity(pc.posx, pc.posy, pc.player_repr);
 	fd.placeEntity(obstacle.posx, obstacle.posy, obstacle.map_repr);
 	cout << fd.FieldRepr();
-	entities[0]->move_self_x();
-	entities[0]->move_self_x();
-	entities[0]->move_self_x();
+	gc.set_entity(&obstacle);
+	gc.move_entities();
 
 	fd.placeEntity(obstacle.posx, obstacle.posy, obstacle.map_repr);
 	cout << fd.FieldRepr();
