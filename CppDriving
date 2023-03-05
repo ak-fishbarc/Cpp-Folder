@@ -113,23 +113,35 @@ public:
 class GameControl
 {
 public:
-	Entity* entities[30];
+	Entity* entities = (Entity*) malloc(sizeof(Entity*) * 30);
 	
-	void set_entity(Entity* entity)
+	void create_entity()
 	{
-	    entities[entity->e_id] = entity;
+        Entity new_obstacle(0, 2, 2, entity_counter);
+        set_entity(new_obstacle);
+        entity_counter += 1;
+	}
+	
+	void set_entity(Entity entity)
+	{
+	    entities[entity.e_id] = entity;
 	}
 	
 	void move_entities(int field_sizex, int** field_array)
 	{
 	    for(int x = 0; x < entity_counter; x++)
 	    {
-	        if(entities[x]->posx+1 <= field_sizex-1)
+	        if(entities[x].posx+1 <= field_sizex-1)
 	        {
-	            field_array[entities[x]->posx][entities[x]->posy] = 0;
-    	        entities[x]->move_self_x();
+	            field_array[entities[x].posx][entities[x].posy] = 0;
+    	        entities[x].move_self_x();
 	        }
 	    }
+	}
+	
+	Entity get_entity(int x)
+	{
+	    return entities[x];
 	}
 };
 
@@ -144,13 +156,18 @@ int main()
 	fd.placeEntity(pc.posx, pc.posy, pc.player_repr);
 	fd.placeEntity(obstacle.posx, obstacle.posy, obstacle.map_repr);
 	cout << fd.FieldRepr();
-	gc.set_entity(&obstacle);
+	gc.set_entity(obstacle);
+	gc.create_entity();
 	// Test loop
 	int game_on = 1;
 	while(game_on == 1)
 	{
 	    gc.move_entities(fd.sizex, fd.field_arr);
-	    fd.placeEntity(obstacle.posx, obstacle.posy, obstacle.map_repr);
+	    for(int x = 0; x < entity_counter; x++)
+	    {
+	        Entity update_entity = gc.get_entity(x);
+	        fd.placeEntity(update_entity.posx, update_entity.posy, update_entity.map_repr);
+	    }
 	    cout << fd.FieldRepr();
 	    sleep(1);
 	}
